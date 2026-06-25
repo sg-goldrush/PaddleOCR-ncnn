@@ -1,9 +1,7 @@
 name: Build
 
 on:
-  push:
-    branches: [main, master]
-  workflow_dispatch:
+  workflow_dispatch:   # 只在 GitHub 网页上手动点 Run workflow
 
 jobs:
   windows:
