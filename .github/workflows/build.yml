@@ -24,10 +24,11 @@ jobs:
 
       - name: Package
         run: |
-          New-Item -ItemType Directory -Force -Path dist
-          Copy-Item build/Release/main.exe dist/
-          Copy-Item build/Release/*.dll  dist/ -ErrorAction SilentlyContinue
-          Copy-Item config.json          dist/
+          New-Item -ItemType Directory -Force -Path dist/ppocr/models
+          Copy-Item build/Release/main.exe dist/ppocr/
+          Copy-Item build/Release/*.dll  dist/ppocr/ -ErrorAction SilentlyContinue
+          # 修正模型路径: ../models/ → ./models/
+          (Get-Content config.json) -replace '"\.\./models/', '"./models/' | Set-Content dist/ppocr/config.json
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
