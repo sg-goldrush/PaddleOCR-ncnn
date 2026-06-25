@@ -1,0 +1,12 @@
+build/
+bin/
+obj/
+check/
+.DS_Store
+*.dylib
+*.exe
+*.dll
+# C# demo 的模型和二进制由 CI 生成，不提交
+c#Demo/ppocr/main
+c#Demo/ppocr/models/
+c#Demo/test.png
