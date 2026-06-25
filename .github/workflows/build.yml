@@ -3,58 +3,16 @@ name: Build
 on:
   push:
     branches: [main, master]
-  workflow_dispatch:   # 允许手动触发
+  workflow_dispatch:
 
 jobs:
-  # ============================================================
-  # macOS (ARM64)
-  # ============================================================
-  macos:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install dependencies
-        run: brew install ncnn opencv libomp
-
-      - name: Configure
-        run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_OSX_SYSROOT=$(xcrun --show-sdk-path)
-
-      - name: Build
-        run: cmake --build build --config Release -j$(sysctl -n hw.logicalcpu)
-
-      - name: Package
-        run: |
-          mkdir -p dist/ppocr/models
-          cp build/main             dist/ppocr/
-          # 修正路径: 开发用 ../models/ → 部署用 ./models/
-          sed 's|"../models/|"./models/|g' config.json > dist/ppocr/config.json
-          cp models/*.param         dist/ppocr/models/
-          cp models/*.bin           dist/ppocr/models/
-          cp models/ppocr_keys_v6.txt dist/ppocr/models/
-          # 附带 C# demo
-          cp c#Demo/*.csproj dist/
-          cp c#Demo/*.cs      dist/
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: paddleocr-macos
-          path: dist/
-
-  # ============================================================
-  # Windows (x64)
-  # ============================================================
   windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
 
       - name: Install dependencies (vcpkg)
-        run: |
-          vcpkg install ncnn:x64-windows opencv[core,imgproc,imgcodecs]:x64-windows
+        run: vcpkg install ncnn:x64-windows opencv:x64-windows
 
       - name: Configure
         run: |
@@ -66,16 +24,10 @@ jobs:
 
       - name: Package
         run: |
-          New-Item -ItemType Directory -Force -Path dist/ppocr/models
-          Copy-Item build/Release/main.exe dist/ppocr/
-          # 修正路径: 开发用 ../models/ → 部署用 ./models/
-          (Get-Content config.json) -replace '"\.\./models/', '"./models/' | Set-Content dist/ppocr/config.json
-          Copy-Item models/*.param          dist/ppocr/models/
-          Copy-Item models/*.bin            dist/ppocr/models/
-          Copy-Item models/ppocr_keys_v6.txt dist/ppocr/models/
-          # 附带 C# demo
-          Copy-Item c#Demo/*.csproj dist/
-          Copy-Item c#Demo/*.cs      dist/
+          New-Item -ItemType Directory -Force -Path dist
+          Copy-Item build/Release/main.exe dist/
+          Copy-Item build/Release/*.dll  dist/ -ErrorAction SilentlyContinue
+          Copy-Item config.json          dist/
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
