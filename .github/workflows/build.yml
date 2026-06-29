@@ -21,12 +21,13 @@ jobs:
             core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
 
       - name: Install dependencies (vcpkg)
-        run: vcpkg install ncnn:x64-windows opencv:x64-windows
+        run: vcpkg install ncnn:x64-windows-static opencv:x64-windows-static
 
       - name: Configure
         run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release `
-            -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF `
+            -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" `
+            -DVCPKG_TARGET_TRIPLET=x64-windows-static
 
       - name: Build
         run: cmake --build build --config Release -j $env:NUMBER_OF_PROCESSORS
@@ -35,7 +36,6 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force -Path dist/ppocr/models
           Copy-Item build/Release/main.exe dist/ppocr/
-          Copy-Item build/Release/*.dll  dist/ppocr/ -ErrorAction SilentlyContinue
           # 修正模型路径: ../models/ → ./models/
           (Get-Content config.json) -replace '"\.\./models/', '"./models/' | Set-Content dist/ppocr/config.json
 

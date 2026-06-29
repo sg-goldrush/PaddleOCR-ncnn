@@ -2,7 +2,7 @@
     "save": true,
     "det": {
         "infer_threads": -1,
-        "model_path": "../models/PP_OCRv6_medium_det",
+        "model_path": "../models/PP_OCRv6_tiny_det",
         "padding": 0,
         "max_side_len": 768,
         "min_side_len": 256,
